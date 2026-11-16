@@ -22,3 +22,4 @@ Not Started
 
 - Initial Next.js setup — Next.js 16, React 19, TypeScript, Tailwind CSS v4, ESLint
 - Project setup and boilerplate cleanup
+
