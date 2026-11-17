@@ -14,16 +14,16 @@ function getInitials(name: string): string {
 
 export default function SidebarUser() {
   return (
-    <div className="flex items-center gap-3 border-t border-sidebar-border p-3">
-      <Avatar size="lg">
+    <div className="flex items-center gap-3 border-t border-sidebar-border p-3 in-data-[collapsed]:justify-center">
+      <Avatar size="lg" title={currentUser.name}>
         {currentUser.image && <AvatarImage src={currentUser.image} alt={currentUser.name} />}
         <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
       </Avatar>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 in-data-[collapsed]:hidden">
         <p className="truncate text-sm font-medium">{currentUser.name}</p>
         <p className="truncate text-xs text-muted-foreground">{currentUser.email}</p>
       </div>
-      <Button variant="ghost" size="icon" aria-label="Settings">
+      <Button variant="ghost" size="icon" aria-label="Settings" className="in-data-[collapsed]:hidden">
         <Settings />
       </Button>
     </div>

@@ -22,13 +22,13 @@ export default function Sidebar({ children }: SidebarProps) {
     <>
       <aside
         aria-label="Sidebar"
-        inert={!isDesktopOpen}
+        data-collapsed={isDesktopOpen ? undefined : ""}
         className={cn(
-          "hidden shrink-0 overflow-hidden border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-out lg:block",
-          isDesktopOpen ? "w-64 border-r" : "w-0",
+          "hidden shrink-0 overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-out lg:block",
+          isDesktopOpen ? "w-64" : "w-16",
         )}
       >
-        <div className="h-full w-64">{children}</div>
+        {children}
       </aside>
 
       <Sheet open={isMobileOpen} onOpenChange={setMobileOpen}>

@@ -9,22 +9,24 @@ export default function SidebarContent() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 shrink-0 items-center px-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5 font-semibold">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+        <Link href="/dashboard" title="DevMind" className="flex items-center gap-2.5 font-semibold">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
             <Layers className="size-4" />
           </span>
-          DevMind
+          <span className="in-data-[collapsed]:hidden">DevMind</span>
         </Link>
       </div>
 
-      <nav aria-label="Main navigation" className="flex-1 space-y-4 overflow-y-auto px-2 py-3">
+      <nav aria-label="Main navigation" className="flex-1 space-y-4 overflow-x-hidden overflow-y-auto px-2 py-3">
         <SidebarSection title="Types">
           <SidebarTypeList />
         </SidebarSection>
-        <div className="mx-2 border-t border-sidebar-border" />
-        <SidebarSection title="Collections">
-          <SidebarCollectionList />
-        </SidebarSection>
+        <div className="space-y-4 in-data-[collapsed]:hidden">
+          <div className="mx-2 border-t border-sidebar-border" />
+          <SidebarSection title="Collections">
+            <SidebarCollectionList />
+          </SidebarSection>
+        </div>
       </nav>
 
       <SidebarUser />
