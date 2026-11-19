@@ -4,33 +4,29 @@
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+In Progress
 
 ## Goals
 
 <!-- Goals & requirements -->
 
-Seed Data — populate the database with sample data for development and demos (`prisma/seed.ts`):
+Dashboard Collections — replace the mock collection data in the dashboard main area with real data from the Neon database via Prisma:
 
-- Demo user: demo@devstash.io, "Demo User", password 12345678 hashed with bcryptjs (12 rounds), isPro false, emailVerified set to the current date
-- 7 system item types (snippet, prompt, command, note, file, image, link) with Lucide icon names, colors and `isSystem: true`
-- 5 collections owned by the demo user, with their items:
-  - **React Patterns** — 3 TypeScript snippets (custom hooks, component patterns, utility functions)
-  - **AI Workflows** — 3 prompts (code review, documentation generation, refactoring assistance)
-  - **DevOps** — 1 snippet (Docker/CI/CD config), 1 command (deployment script), 2 links (real documentation URLs)
-  - **Terminal Commands** — 4 commands (git, Docker, process management, package manager utilities)
-  - **Design Resources** — 4 links with real URLs (CSS/Tailwind, component libraries, design systems, icon libraries)
+- Create `src/lib/db/collections.ts` with data fetching functions
+- Fetch collections directly in the server component (no mock data from `src/lib/mock-data.ts`)
+- Keep the current design: the 6 recent collection cards
+- Collection card border color derived from the most-used item type in that collection
+- Show small icons of all item types in that collection
+- Update the collection stats display
+- Do not add the items underneath yet (later feature)
 
 ## Notes
 
 <!-- Any extra notes -->
 
-- Spec: @context/features/seed-spec.md
+- Spec: @context/features/dashboard-collections-spec.md
+- Reference screenshot: @context/screenshots/dashboard-ui-main.png (layout and design already exist)
 - Schema: @prisma/schema.prisma
-- The existing `prisma/seed.ts` (system item types only) can be overwritten
-- Install `bcryptjs` for password hashing
-- The seed must be safe to re-run without creating duplicates
-- Run with `npx prisma db seed` (Prisma 7 does not seed automatically after migrations)
 
 ## History
 
@@ -43,3 +39,4 @@ Seed Data — populate the database with sample data for development and demos (
 - Dashboard UI Phase 3 — main area with 4 stats cards, recent collection cards, pinned items and 10 recent items from mock data; sidebar collapses to an icon rail (logo, type icons, avatar); New Collection button and centered search in top bar; dark themed scrollbars
 - Database Setup — Prisma 7 with Neon PostgreSQL via `@prisma/adapter-neon`, initial schema (NextAuth models, indexes, cascade deletes), `init` migration applied to the dev branch, shared Prisma client in `src/lib/prisma.ts`, re-runnable seed for the 7 system item types
 - Seed Data — demo user (bcryptjs-hashed password), 7 system item types, 5 collections with 18 items (snippets, prompts, commands, real links); data in `prisma/seed-data.ts`, safe to re-run
+- Dashboard Collections — recent collection cards and collection stats loaded from Neon via Prisma (`src/lib/db/collections.ts`), card border from the most-used item type, type icons per collection, Suspense skeletons (scoped to the demo user until auth)

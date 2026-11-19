@@ -1,17 +1,14 @@
+import { Suspense } from "react";
 import { Clock, Pin } from "lucide-react";
-import StatsCards from "@/components/dashboard/StatsCards";
+import StatsCards, { StatsCardsSkeleton } from "@/components/dashboard/StatsCards";
 import DashboardSection from "@/components/dashboard/DashboardSection";
-import CollectionCard from "@/components/dashboard/CollectionCard";
+import RecentCollections, {
+  RecentCollectionsSkeleton,
+} from "@/components/dashboard/RecentCollections";
 import ItemCard from "@/components/dashboard/ItemCard";
-import {
-  getDashboardStats,
-  getPinnedItems,
-  getRecentCollections,
-  getRecentItems,
-} from "@/lib/dashboard-data";
+import { getPinnedItems, getRecentItems } from "@/lib/dashboard-data";
 
 export default function DashboardPage() {
-  const recentCollections = getRecentCollections();
   const pinnedItems = getPinnedItems();
   const recentItems = getRecentItems();
 
@@ -22,14 +19,14 @@ export default function DashboardPage() {
         <p className="mt-1 text-muted-foreground">Your developer knowledge hub</p>
       </header>
 
-      <StatsCards stats={getDashboardStats()} />
+      <Suspense fallback={<StatsCardsSkeleton />}>
+        <StatsCards />
+      </Suspense>
 
       <DashboardSection title="Collections" viewAllHref="/collections">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {recentCollections.map((summary) => (
-            <CollectionCard key={summary.collection.id} summary={summary} />
-          ))}
-        </div>
+        <Suspense fallback={<RecentCollectionsSkeleton />}>
+          <RecentCollections />
+        </Suspense>
       </DashboardSection>
 
       {pinnedItems.length > 0 && (
