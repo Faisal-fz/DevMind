@@ -1,7 +1,7 @@
 import { FolderOpen, FolderHeart, Layers, Star, type LucideIcon } from "lucide-react";
 import { connection } from "next/server";
 import { getCollectionStats } from "@/lib/db/collections";
-import { getItemStats } from "@/lib/dashboard-data";
+import { getItemStats } from "@/lib/db/items";
 
 interface StatCard {
   label: string;
@@ -14,8 +14,7 @@ const SKELETON_COUNT = 4;
 
 export default async function StatsCards() {
   await connection();
-  const itemStats = getItemStats();
-  const collectionStats = await getCollectionStats();
+  const [itemStats, collectionStats] = await Promise.all([getItemStats(), getCollectionStats()]);
 
   const cards: StatCard[] = [
     { label: "Items", value: itemStats.items, icon: Layers },

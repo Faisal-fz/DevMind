@@ -1,9 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { DEMO_USER_EMAIL } from "@/lib/db/demo-user";
 
 const RECENT_COLLECTIONS_LIMIT = 6;
-
-// Temporary until authentication is added: dashboard data belongs to the seeded demo user.
-export const DEMO_USER_EMAIL = "demo@devstash.io";
 
 export interface CollectionItemType {
   id: string;

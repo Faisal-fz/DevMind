@@ -1,7 +1,6 @@
 import { File, Pin, Star } from "lucide-react";
 import { cn } from "cn";
-import type { MockItem } from "@/lib/mock-data";
-import { getItemType } from "@/lib/dashboard-data";
+import type { ItemSummary } from "@/lib/db/items";
 import {
   ITEM_TYPE_BG_COLORS,
   ITEM_TYPE_BORDER_COLORS,
@@ -17,12 +16,11 @@ const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
 });
 
 interface ItemCardProps {
-  item: MockItem;
+  item: ItemSummary;
 }
 
 export default function ItemCard({ item }: ItemCardProps) {
-  const type = getItemType(item.itemTypeId);
-  const typeName = type && isItemTypeName(type.name) ? type.name : null;
+  const typeName = isItemTypeName(item.typeName) ? item.typeName : null;
   const Icon = typeName ? ITEM_TYPE_ICONS[typeName] : File;
 
   return (
@@ -61,8 +59,8 @@ export default function ItemCard({ item }: ItemCardProps) {
           </ul>
         )}
       </div>
-      <time dateTime={item.updatedAt} className="shrink-0 text-xs text-muted-foreground">
-        {DATE_FORMAT.format(new Date(item.updatedAt))}
+      <time dateTime={item.updatedAt.toISOString()} className="shrink-0 text-xs text-muted-foreground">
+        {DATE_FORMAT.format(item.updatedAt)}
       </time>
     </article>
   );
