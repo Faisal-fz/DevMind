@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { DEMO_USER_EMAIL } from "@/lib/db/demo-user";
+import { getItemTypeOrder } from "@/lib/constants/item-types";
 
 const RECENT_ITEMS_LIMIT = 10;
 
@@ -60,6 +61,29 @@ export async function getRecentItems(email: string = DEMO_USER_EMAIL): Promise<I
   });
 
   return items.map(toItemSummary);
+}
+
+export interface ItemTypeSummary {
+  id: string;
+  name: string;
+  itemCount: number;
+}
+
+export async function getSystemItemTypes(
+  email: string = DEMO_USER_EMAIL,
+): Promise<ItemTypeSummary[]> {
+  const itemTypes = await prisma.itemType.findMany({
+    where: { isSystem: true },
+    select: {
+      id: true,
+      name: true,
+      _count: { select: { items: { where: { user: { email } } } } },
+    },
+  });
+
+  return itemTypes
+    .map(({ _count, ...itemType }) => ({ ...itemType, itemCount: _count.items }))
+    .toSorted((a, b) => getItemTypeOrder(a.name) - getItemTypeOrder(b.name));
 }
 
 export async function getItemStats(email: string = DEMO_USER_EMAIL): Promise<ItemStats> {

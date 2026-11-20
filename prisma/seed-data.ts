@@ -25,6 +25,7 @@ export interface SeedItem {
 export interface SeedCollection {
   name: string;
   description: string;
+  isFavorite?: boolean;
   items: SeedItem[];
 }
 
@@ -146,6 +147,7 @@ export function formatRelative(date: Date): string {
 const AI_WORKFLOWS: SeedCollection = {
   name: "AI Workflows",
   description: "AI prompts and workflow automations",
+  isFavorite: true,
   items: [
     {
       title: "Code review prompt",
@@ -202,6 +204,7 @@ Code:
 const DEVOPS: SeedCollection = {
   name: "DevOps",
   description: "Infrastructure and deployment resources",
+  isFavorite: true,
   items: [
     {
       title: "GitHub Actions CI for Next.js",

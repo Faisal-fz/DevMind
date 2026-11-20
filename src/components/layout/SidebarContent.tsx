@@ -1,8 +1,11 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Layers } from "lucide-react";
 import SidebarSection from "@/components/layout/SidebarSection";
-import SidebarTypeList from "@/components/layout/SidebarTypeList";
-import SidebarCollectionList from "@/components/layout/SidebarCollectionList";
+import SidebarTypeList, { SidebarTypeListSkeleton } from "@/components/layout/SidebarTypeList";
+import SidebarCollectionList, {
+  SidebarCollectionListSkeleton,
+} from "@/components/layout/SidebarCollectionList";
 import SidebarUser from "@/components/layout/SidebarUser";
 
 export default function SidebarContent() {
@@ -19,12 +22,16 @@ export default function SidebarContent() {
 
       <nav aria-label="Main navigation" className="flex-1 space-y-4 overflow-x-hidden overflow-y-auto px-2 py-3">
         <SidebarSection title="Types">
-          <SidebarTypeList />
+          <Suspense fallback={<SidebarTypeListSkeleton />}>
+            <SidebarTypeList />
+          </Suspense>
         </SidebarSection>
         <div className="space-y-4 in-data-[collapsed]:hidden">
           <div className="mx-2 border-t border-sidebar-border" />
           <SidebarSection title="Collections">
-            <SidebarCollectionList />
+            <Suspense fallback={<SidebarCollectionListSkeleton />}>
+              <SidebarCollectionList />
+            </Suspense>
           </SidebarSection>
         </div>
       </nav>

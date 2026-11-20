@@ -88,14 +88,14 @@ async function seedCollection(collection: SeedCollection, userId: string, typeId
     where: { userId, name: collection.name },
   });
 
+  const data = {
+    description: collection.description,
+    isFavorite: collection.isFavorite ?? false,
+  };
+
   const saved = existing
-    ? await prisma.collection.update({
-        where: { id: existing.id },
-        data: { description: collection.description },
-      })
-    : await prisma.collection.create({
-        data: { name: collection.name, description: collection.description, userId },
-      });
+    ? await prisma.collection.update({ where: { id: existing.id }, data })
+    : await prisma.collection.create({ data: { ...data, name: collection.name, userId } });
 
   for (const item of collection.items) {
     const savedItem = await seedItem(item, userId, typeIds);

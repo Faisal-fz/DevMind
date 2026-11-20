@@ -51,8 +51,26 @@ export const ITEM_TYPE_BG_COLORS: Record<ItemTypeName, string> = {
   link: "bg-link/10",
 };
 
+export const ITEM_TYPE_DOT_COLORS: Record<ItemTypeName, string> = {
+  snippet: "bg-snippet",
+  prompt: "bg-prompt",
+  command: "bg-command",
+  note: "bg-note",
+  file: "bg-file",
+  image: "bg-image",
+  link: "bg-link",
+};
+
+const ITEM_TYPE_ORDER = Object.keys(ITEM_TYPE_ICONS);
+
 export function isItemTypeName(name: string): name is ItemTypeName {
   return name in ITEM_TYPE_ICONS;
+}
+
+// Types not in the system list sort after the system types.
+export function getItemTypeOrder(name: string): number {
+  const index = ITEM_TYPE_ORDER.indexOf(name);
+  return index === -1 ? ITEM_TYPE_ORDER.length : index;
 }
 
 export function getItemTypeHref(name: string): string {

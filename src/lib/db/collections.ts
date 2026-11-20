@@ -1,7 +1,9 @@
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { DEMO_USER_EMAIL } from "@/lib/db/demo-user";
 
 const RECENT_COLLECTIONS_LIMIT = 6;
+const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
 
 export interface CollectionItemType {
   id: string;
@@ -17,6 +19,11 @@ export interface CollectionSummary {
   itemCount: number;
   // Sorted by item count (most-used first), so types[0] is the dominant type.
   types: CollectionItemType[];
+}
+
+export interface SidebarCollections {
+  favorites: CollectionSummary[];
+  recent: CollectionSummary[];
 }
 
 export interface CollectionStats {
@@ -38,6 +45,28 @@ function summarizeTypes(itemTypes: { id: string; name: string }[]): CollectionIt
   );
 }
 
+const COLLECTION_SUMMARY_SELECT = {
+  id: true,
+  name: true,
+  description: true,
+  isFavorite: true,
+  items: {
+    select: { item: { select: { itemType: { select: { id: true, name: true } } } } },
+  },
+} satisfies Prisma.CollectionSelect;
+
+type CollectionSummaryRow = Prisma.CollectionGetPayload<{
+  select: typeof COLLECTION_SUMMARY_SELECT;
+}>;
+
+function toCollectionSummary({ items, ...collection }: CollectionSummaryRow): CollectionSummary {
+  return {
+    ...collection,
+    itemCount: items.length,
+    types: summarizeTypes(items.map(({ item }) => item.itemType)),
+  };
+}
+
 export async function getRecentCollections(
   email: string = DEMO_USER_EMAIL,
 ): Promise<CollectionSummary[]> {
@@ -45,22 +74,33 @@ export async function getRecentCollections(
     where: { user: { email } },
     orderBy: { createdAt: "desc" },
     take: RECENT_COLLECTIONS_LIMIT,
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      isFavorite: true,
-      items: {
-        select: { item: { select: { itemType: { select: { id: true, name: true } } } } },
-      },
-    },
+    select: COLLECTION_SUMMARY_SELECT,
   });
 
-  return collections.map(({ items, ...collection }) => ({
-    ...collection,
-    itemCount: items.length,
-    types: summarizeTypes(items.map(({ item }) => item.itemType)),
-  }));
+  return collections.map(toCollectionSummary);
+}
+
+export async function getSidebarCollections(
+  email: string = DEMO_USER_EMAIL,
+): Promise<SidebarCollections> {
+  const [favorites, recent] = await Promise.all([
+    prisma.collection.findMany({
+      where: { user: { email }, isFavorite: true },
+      orderBy: { name: "asc" },
+      select: COLLECTION_SUMMARY_SELECT,
+    }),
+    prisma.collection.findMany({
+      where: { user: { email }, isFavorite: false },
+      orderBy: { createdAt: "desc" },
+      take: SIDEBAR_RECENT_COLLECTIONS_LIMIT,
+      select: COLLECTION_SUMMARY_SELECT,
+    }),
+  ]);
+
+  return {
+    favorites: favorites.map(toCollectionSummary),
+    recent: recent.map(toCollectionSummary),
+  };
 }
 
 export async function getCollectionStats(

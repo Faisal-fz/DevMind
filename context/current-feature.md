@@ -10,22 +10,22 @@ Completed
 
 <!-- Goals & requirements -->
 
-Dashboard Items — replace the mock item data in the dashboard main area (pinned and recent items) with real data from the Neon database via Prisma:
+Stats & Sidebar — show the main area stats and the sidebar item types and collections from the Neon database instead of `src/lib/mock-data.ts`:
 
-- Create `src/lib/db/items.ts` with data fetching functions
-- Fetch items directly in the server component (no mock data from `src/lib/mock-data.ts`)
-- Keep the current design for the Pinned and Recent Items sections
-- If there are no pinned items, the Pinned section is not displayed
-- Item card icon and border derived from the item type
-- Display item type tags and everything else currently on the card
-- Update the stats display (item counts from the database)
+- Display stats from database data, keeping the current design/layout
+- Display system item types in the sidebar with their icons, linking to `/items/[typename]`
+- Show actual collection data from the database in the sidebar
+- Add a "View all collections" link under the collections list that goes to `/collections`
+- Keep the star icons for favorite collections; for recent collections, show a colored circle based on the most-used item type in that collection
+- Add the database functions to `src/lib/db/items.ts` (use `src/lib/db/collections.ts` for reference)
 
 ## Notes
 
 <!-- Any extra notes -->
 
-- Spec: @context/features/dashboard-items-spec.md
-- Reference screenshot: @context/screenshots/dashboard-ui-main.png (layout and design already exist)
+- Spec: @context/features/stats-sidebar-spec.md
+- Reference: @src/lib/db/collections.ts
+- `src/lib/db/items.ts` already exists from Dashboard Items — extend it rather than recreate it
 - Schema: @prisma/schema.prisma
 
 ## History
@@ -41,3 +41,4 @@ Dashboard Items — replace the mock item data in the dashboard main area (pinne
 - Seed Data — demo user (bcryptjs-hashed password), 7 system item types, 5 collections with 18 items (snippets, prompts, commands, real links); data in `prisma/seed-data.ts`, safe to re-run
 - Dashboard Collections — recent collection cards and collection stats loaded from Neon via Prisma (`src/lib/db/collections.ts`), card border from the most-used item type, type icons per collection, Suspense skeletons (scoped to the demo user until auth)
 - Dashboard Items — pinned and recent items plus item stats loaded from Neon via Prisma (`src/lib/db/items.ts`), card icon/border from the item type, Pinned section hidden when empty, shared `DEMO_USER_EMAIL` in `src/lib/db/demo-user.ts`, removed `src/lib/dashboard-data.ts`
+- Stats & Sidebar — sidebar item types (system types with icons and item counts, linking to /items/TYPE) and collections loaded from Neon via Prisma (`getSystemItemTypes` in `src/lib/db/items.ts`, `getSidebarCollections` in `src/lib/db/collections.ts`), favorites keep the star, recent collections show a colored dot for their most-used item type, "View all collections" link to /collections, Suspense skeletons; seed now sets `isFavorite` (AI Workflows and DevOps)
