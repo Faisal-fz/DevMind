@@ -63,6 +63,12 @@ export const ITEM_TYPE_DOT_COLORS: Record<ItemTypeName, string> = {
 
 const ITEM_TYPE_ORDER = Object.keys(ITEM_TYPE_ICONS);
 
+const PRO_ITEM_TYPES: readonly string[] = ["file", "image"];
+
+export function isProItemType(name: string): boolean {
+  return PRO_ITEM_TYPES.includes(name);
+}
+
 export function isItemTypeName(name: string): name is ItemTypeName {
   return name in ITEM_TYPE_ICONS;
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { File } from "lucide-react";
 import { connection } from "next/server";
 import { cn } from "cn";
+import { Badge } from "@/components/ui/badge";
 import { getSystemItemTypes } from "@/lib/db/items";
 import {
   ITEM_TYPE_ICONS,
@@ -9,6 +10,7 @@ import {
   getItemTypeHref,
   getItemTypeLabel,
   isItemTypeName,
+  isProItemType,
 } from "@/lib/constants/item-types";
 
 const SKELETON_COUNT = 7;
@@ -33,6 +35,14 @@ export default async function SidebarTypeList() {
             >
               <Icon className={cn("size-4 shrink-0", colorClass)} />
               <span className="flex-1 truncate in-data-[collapsed]:hidden">{label}</span>
+              {isProItemType(type.name) && (
+                <Badge
+                  variant="outline"
+                  className="h-4 px-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground in-data-[collapsed]:hidden"
+                >
+                  PRO
+                </Badge>
+              )}
               <span className="text-xs text-muted-foreground tabular-nums in-data-[collapsed]:hidden">
                 {type.itemCount}
               </span>
