@@ -1,18 +1,32 @@
-# Current Feature
+# Current Feature: Forgot Password
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+In Progress
 
 ## Goals
 
 <!-- Goals & requirements -->
 
+- "Forgot password?" link on the sign-in form (next to the password label) going to `/forgot-password`
+- `/forgot-password` page: user enters their email, and a server action sends them a password reset link via Resend
+- Same generic response every time ("If an account exists, we've sent a reset link") so it doesn't reveal whether an account exists
+- Only users with a password (email/password accounts) get the email; GitHub-only users get the same generic message and no email
+- Reset link is single-use and expires after 1 hour; requesting a new one replaces the old one; 60s cooldown between requests
+- `/reset-password?token=...` page: new password + confirm password (same 8–72 char rules as registration, shared Zod schema)
+- On submit: validate the token (invalid/expired shows an error with a link back to `/forgot-password`), bcrypt-hash the new password, update `User.password`, delete the token, redirect to `/sign-in?reset=1` with a "Password updated" alert
+- Server actions return `{ success, data, error }`; reuse existing auth components (`AuthCard`, `FormField`, `FormAlert`)
+
 ## Notes
 
 <!-- Any extra notes -->
+
+- Reset tokens reuse the existing `VerificationToken` table (SHA-256 hash only, no migration), under a separate identifier like `password-reset:<email>` so they never clash with sign-up verification tokens
+- Mirrors the existing pattern in `src/lib/email/verification-token.ts` and `verification-email.ts`; new files likely `password-reset-token.ts`, `password-reset-email.ts`, `ForgotPasswordForm.tsx`, `ResetPasswordForm.tsx`, plus the two pages in `src/app/(auth)/`
+- Existing email verification and the `EMAIL_VERIFICATION_ENABLED` flag are unchanged
+- Both new pages must be reachable while signed out (check `src/proxy.ts`)
 
 ## History
 

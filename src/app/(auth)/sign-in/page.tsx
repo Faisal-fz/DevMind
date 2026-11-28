@@ -36,6 +36,7 @@ async function SignInOptions({ searchParams }: { searchParams: SignInSearchParam
   const registered = firstParam(params.registered) === "1";
   const verified = firstParam(params.verified) === "1";
   const verifyError = firstParam(params.verifyError);
+  const passwordReset = firstParam(params.reset) === "1";
 
   return (
     <div className="space-y-4">
@@ -44,6 +45,9 @@ async function SignInOptions({ searchParams }: { searchParams: SignInSearchParam
       )}
       {verified && (
         <FormAlert variant="success" message="Email verified. You can now sign in." />
+      )}
+      {passwordReset && (
+        <FormAlert variant="success" message="Password updated. Sign in with your new password." />
       )}
       {verifyError && (
         <FormAlert message={VERIFY_ERROR_MESSAGES[verifyError] ?? VERIFY_ERROR_MESSAGES.invalid} />

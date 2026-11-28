@@ -1,19 +1,11 @@
 import { APP_URL, EMAIL_FROM, getResend } from "@/lib/email/resend";
 import { createVerificationToken } from "@/lib/email/verification-token";
+import { escapeHtml } from "@/lib/email/escape-html";
 
 interface VerificationEmailContent {
   subject: string;
   html: string;
   text: string;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 function buildVerificationEmail(url: string, name: string | null): VerificationEmailContent {

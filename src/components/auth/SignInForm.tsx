@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import FormField from "@/components/auth/FormField";
 import FormAlert from "@/components/auth/FormAlert";
@@ -40,6 +41,14 @@ export default function SignInForm({ callbackUrl }: SignInFormProps) {
           type="password"
           autoComplete="current-password"
           error={state.fieldErrors?.password}
+          labelAction={
+            <Link
+              href="/forgot-password"
+              className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+            >
+              Forgot password?
+            </Link>
+          }
           required
         />
         <Button type="submit" size="lg" className="w-full" disabled={isPending}>
