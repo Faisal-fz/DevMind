@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { isEmailVerificationEnabled } from "@/lib/email/verification-config";
 import { signInSchema } from "@/lib/validations/auth";
 import authConfig, { CREDENTIALS_FIELDS } from "./auth.config";
 
@@ -26,7 +27,7 @@ const credentialsProvider = Credentials({
     if (!isValid) return null;
 
     // Checked only after the password matches, so it doesn't reveal which emails exist
-    if (!user.emailVerified) throw new EmailNotVerifiedError();
+    if (!user.emailVerified && isEmailVerificationEnabled()) throw new EmailNotVerifiedError();
 
     return { id: user.id, name: user.name, email: user.email, image: user.image };
   },

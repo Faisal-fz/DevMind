@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { emailSchema, signInSchema } from "@/lib/validations/auth";
 import { sendVerificationEmail } from "@/lib/email/verification-email";
 import { isInResendCooldown } from "@/lib/email/verification-token";
+import { isEmailVerificationEnabled } from "@/lib/email/verification-config";
 
 const DEFAULT_REDIRECT = "/dashboard";
 
@@ -88,6 +89,7 @@ const RESEND_MESSAGE =
 export async function resendVerificationEmail(email: string): Promise<ResendVerificationResult> {
   const parsed = emailSchema.safeParse(email);
   if (!parsed.success) return { success: false, error: "Enter a valid email address." };
+  if (!isEmailVerificationEnabled()) return { success: true, data: { message: RESEND_MESSAGE } };
 
   try {
     const user = await prisma.user.findUnique({

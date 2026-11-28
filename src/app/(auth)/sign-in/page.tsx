@@ -33,11 +33,15 @@ async function SignInOptions({ searchParams }: { searchParams: SignInSearchParam
   const params = await searchParams;
   const callbackUrl = firstParam(params.callbackUrl);
   const authError = firstParam(params.error);
+  const registered = firstParam(params.registered) === "1";
   const verified = firstParam(params.verified) === "1";
   const verifyError = firstParam(params.verifyError);
 
   return (
     <div className="space-y-4">
+      {registered && (
+        <FormAlert variant="success" message="Account created. You can now sign in." />
+      )}
       {verified && (
         <FormAlert variant="success" message="Email verified. You can now sign in." />
       )}

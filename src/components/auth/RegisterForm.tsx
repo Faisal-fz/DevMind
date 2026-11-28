@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import FormField from "@/components/auth/FormField";
 import FormAlert from "@/components/auth/FormAlert";
@@ -13,6 +14,7 @@ type FieldErrors = Partial<Record<RegisterField, string>>;
 interface RegisteredUser {
   email: string;
   emailSent: boolean;
+  verificationRequired: boolean;
 }
 
 interface RegisterResponse {
@@ -38,6 +40,7 @@ function getFieldErrors(values: Record<RegisterField, string>): FieldErrors {
 }
 
 export default function RegisterForm() {
+  const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string>();
   const [isPending, setIsPending] = useState(false);
@@ -47,7 +50,8 @@ export default function RegisterForm() {
     event.preventDefault();
     setError(undefined);
 
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const values = Object.fromEntries(
       REGISTER_FIELDS.map((field) => [field, String(formData.get(field) ?? "")]),
     ) as Record<RegisterField, string>;
@@ -68,6 +72,14 @@ export default function RegisterForm() {
       if (!response.ok || !result.success || !result.data) {
         setError(result.error ?? "Registration failed. Please try again.");
         setIsPending(false);
+        return;
+      }
+
+      if (!result.data.verificationRequired) {
+        // Next keeps this route mounted after navigating, so clear it for a later visit
+        form.reset();
+        setIsPending(false);
+        router.push("/sign-in?registered=1");
         return;
       }
 

@@ -1,18 +1,33 @@
-# Current Feature
+# Current Feature: Email Verification Toggle
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+In Progress
 
 ## Goals
 
 <!-- Goals & requirements -->
 
+- Add an `EMAIL_VERIFICATION_ENABLED` env flag; verification stays **on** unless it is set to `"false"`
+- Read the flag in one server-only helper (`isEmailVerificationEnabled()`) so every check uses the same logic
+- When disabled, `POST /api/auth/register` skips the Resend email, creates the user with `emailVerified` set to now, and returns `verificationRequired: false`
+- When disabled, credentials sign-in skips the `EmailNotVerifiedError` check (so existing unverified accounts can sign in too)
+- When disabled, the `resendVerificationEmail` action does nothing and returns its usual generic response
+- Register form: if `verificationRequired` is false, redirect to `/sign-in?registered=1` and show an "Account created. You can now sign in." success alert instead of `CheckInboxNotice`
+- Document the flag in `.env.example`
+- When enabled, the current verification flow is unchanged
+
 ## Notes
 
 <!-- Any extra notes -->
+
+- Why: Resend has no verified domain yet, so it only delivers to the account owner's address. Every other sign-up gets stuck unverified.
+- Default-on keeps production safe if the variable is forgotten. Set `EMAIL_VERIFICATION_ENABLED=false` in `.env` for local development (and in production until a domain is linked).
+- Users created while the flag is off are marked verified, so turning it back on won't lock them out.
+- No schema change or migration needed.
+- The verify-email route and token code stay in place; they just aren't triggered while the flag is off.
 
 ## History
 
