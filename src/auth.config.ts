@@ -9,6 +9,9 @@ export const CREDENTIALS_FIELDS = {
 
 // Edge-safe config: the real Credentials authorize (Prisma + bcrypt) lives in auth.ts
 export default {
+  pages: {
+    signIn: "/sign-in",
+  },
   providers: [
     GitHub,
     Credentials({

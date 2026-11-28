@@ -6,7 +6,7 @@ import SidebarTypeList, { SidebarTypeListSkeleton } from "@/components/layout/Si
 import SidebarCollectionList, {
   SidebarCollectionListSkeleton,
 } from "@/components/layout/SidebarCollectionList";
-import SidebarUser from "@/components/layout/SidebarUser";
+import SidebarUser, { SidebarUserSkeleton } from "@/components/layout/SidebarUser";
 
 export default function SidebarContent() {
   return (
@@ -36,7 +36,9 @@ export default function SidebarContent() {
         </div>
       </nav>
 
-      <SidebarUser />
+      <Suspense fallback={<SidebarUserSkeleton />}>
+        <SidebarUser />
+      </Suspense>
     </div>
   );
 }
