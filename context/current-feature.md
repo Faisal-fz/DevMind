@@ -1,33 +1,18 @@
-# Current Feature: Email Verification Toggle
+# Current Feature
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-In Progress
+Completed
 
 ## Goals
 
 <!-- Goals & requirements -->
 
-- Add an `EMAIL_VERIFICATION_ENABLED` env flag; verification stays **on** unless it is set to `"false"`
-- Read the flag in one server-only helper (`isEmailVerificationEnabled()`) so every check uses the same logic
-- When disabled, `POST /api/auth/register` skips the Resend email, creates the user with `emailVerified` set to now, and returns `verificationRequired: false`
-- When disabled, credentials sign-in skips the `EmailNotVerifiedError` check (so existing unverified accounts can sign in too)
-- When disabled, the `resendVerificationEmail` action does nothing and returns its usual generic response
-- Register form: if `verificationRequired` is false, redirect to `/sign-in?registered=1` and show an "Account created. You can now sign in." success alert instead of `CheckInboxNotice`
-- Document the flag in `.env.example`
-- When enabled, the current verification flow is unchanged
-
 ## Notes
 
 <!-- Any extra notes -->
-
-- Why: Resend has no verified domain yet, so it only delivers to the account owner's address. Every other sign-up gets stuck unverified.
-- Default-on keeps production safe if the variable is forgotten. Set `EMAIL_VERIFICATION_ENABLED=false` in `.env` for local development (and in production until a domain is linked).
-- Users created while the flag is off are marked verified, so turning it back on won't lock them out.
-- No schema change or migration needed.
-- The verify-email route and token code stay in place; they just aren't triggered while the flag is off.
 
 ## History
 
@@ -48,3 +33,4 @@ In Progress
 - Auth Phase 2 — email/password sign-in via the NextAuth Credentials provider (edge-safe `authorize: () => null` placeholder in `src/auth.config.ts`, replaced in `src/auth.ts` with a bcrypt check against `User.password`); `POST /api/auth/register` (name, email, password, confirmPassword; 201/400/409/500 with `{ success, data, error }`, cost-12 bcrypt hash); Zod added for validation with shared schemas in `src/lib/validations/auth.ts` (emails trimmed and lowercased, passwords 8–72 chars); `.playwright-mcp/` gitignored
 - Auth Phase 3 — custom `/sign-in` and `/register` pages in the `(auth)` route group (`pages.signIn` in `src/auth.config.ts`); credentials sign-in, GitHub sign-in and sign-out as server actions in `src/actions/auth.ts` (`callbackUrl` limited to relative paths); register form validates with the shared `registerSchema` before posting to `/api/auth/register`, then redirects to `/sign-in?registered=1`; proxy redirects signed-out users to `/sign-in`; sidebar shows the session user via reusable `UserAvatar` (`src/components/shared/UserAvatar.tsx`, image or initials) with a dropup menu (Profile, Sign out) and a settings link to `/profile`; `SidebarUser` uses Suspense + `connection()` for Cache Components; form fields use `useId` since Next keeps previous routes mounted; shadcn dropdown-menu and label added; removed `src/lib/mock-data.ts`
 - Email Verification — `resend` SDK; registration sends a verification email (`src/lib/email/verification-email.ts`, lazy client via `getResend()` in `src/lib/email/resend.ts`, `EMAIL_FROM`/`APP_URL` env with dev defaults `onboarding@resend.dev`/`http://localhost:3000`); single-use 24h tokens in `VerificationToken` storing only a SHA-256 hash (`src/lib/email/verification-token.ts`, no migration); `GET /api/auth/verify-email` sets `emailVerified` and redirects to `/sign-in?verified=1` or `?verifyError=invalid|expired`; credentials sign-in blocked for unverified users via `EmailNotVerifiedError` (custom `CredentialsSignin` code, checked after the password matches); register form shows `CheckInboxNotice` instead of redirecting; `resendVerificationEmail` action + `ResendVerificationButton` with 60s cooldown (`RESEND_COOLDOWN_SECONDS` in `src/lib/constants/auth.ts`) and a response that doesn't reveal whether the account exists; shared `emailSchema` exported from `src/lib/validations/auth.ts`
+- Email Verification Toggle — `EMAIL_VERIFICATION_ENABLED` env flag (on unless `"false"`), read via `isEmailVerificationEnabled()` in `src/lib/email/verification-config.ts`; when off, registration skips the Resend email and saves `emailVerified` as now (so re-enabling won't lock users out), credentials sign-in skips the `EmailNotVerifiedError` check, `resendVerificationEmail` returns its generic message without sending; register response adds `verificationRequired`, and the form resets itself then redirects to `/sign-in?registered=1` ("Account created" alert) instead of showing `CheckInboxNotice`; flag documented in `.env.example`
