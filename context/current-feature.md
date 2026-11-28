@@ -1,37 +1,18 @@
-# Current Feature: Email Verification
+# Current Feature
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-In Progress
+Completed
 
 ## Goals
 
 <!-- Goals & requirements -->
 
-- Registering an email/password account sends a verification email through Resend
-- The email has a link with a single-use token that expires
-- Opening the link sets `User.emailVerified` and deletes the token, then sends the user to `/sign-in` with a success message
-- Invalid, expired or already-used links show a clear error message
-- Email/password sign-in is blocked until the email is verified, with a clear message
-- After registering, the user is told to check their inbox (not just "Account created")
-- "Resend verification email" option for unverified users (from the check-your-inbox message and the blocked sign-in message); issues a new token and replaces the old one, with a cooldown to prevent spamming
-
 ## Notes
 
 <!-- Any extra notes -->
-
-- Inline description: "when user register they get an email and user get an link to verify their email. for this we are using resend."
-- `RESEND_API_KEY` is already set in `.env` and `.env.production`
-- Schema already has `User.emailVerified` and the `VerificationToken` model (`identifier`, `token`, `expires`), so no migration should be needed
-- Registration lives in `POST /api/auth/register`; sign-in is the `signInWithCredentials` server action plus `authorize` in `src/auth.ts`
-- Store a hash of the token in the database, not the raw token; send the raw token in the link
-- Need a sender address and an app base URL for the link (e.g. `EMAIL_FROM`, `AUTH_URL`/`NEXT_PUBLIC_APP_URL`). Without a verified domain, Resend only sends from `onboarding@resend.dev` and only to the Resend account owner's email
-- GitHub OAuth users are not affected; GitHub has already verified those emails
-- Existing users (seeded demo user, earlier test users) have `emailVerified = null` and would be locked out; the seed should set `emailVerified` for the demo user
-- Resend action must not reveal whether an email is registered (same response either way)
-- Out of scope: password reset
 
 ## History
 
@@ -51,3 +32,4 @@ In Progress
 - Auth Phase 1 — NextAuth v5 (`next-auth@beta`) with GitHub OAuth; split config (`src/auth.config.ts` edge-safe providers, `src/auth.ts` with Prisma adapter and JWT sessions, `user.id` on the session); API route at `src/app/api/auth/[...nextauth]`; `src/proxy.ts` redirects signed-out users from `/dashboard/*` to NextAuth's default sign-in page; Session type extended in `src/types/next-auth.d.ts`
 - Auth Phase 2 — email/password sign-in via the NextAuth Credentials provider (edge-safe `authorize: () => null` placeholder in `src/auth.config.ts`, replaced in `src/auth.ts` with a bcrypt check against `User.password`); `POST /api/auth/register` (name, email, password, confirmPassword; 201/400/409/500 with `{ success, data, error }`, cost-12 bcrypt hash); Zod added for validation with shared schemas in `src/lib/validations/auth.ts` (emails trimmed and lowercased, passwords 8–72 chars); `.playwright-mcp/` gitignored
 - Auth Phase 3 — custom `/sign-in` and `/register` pages in the `(auth)` route group (`pages.signIn` in `src/auth.config.ts`); credentials sign-in, GitHub sign-in and sign-out as server actions in `src/actions/auth.ts` (`callbackUrl` limited to relative paths); register form validates with the shared `registerSchema` before posting to `/api/auth/register`, then redirects to `/sign-in?registered=1`; proxy redirects signed-out users to `/sign-in`; sidebar shows the session user via reusable `UserAvatar` (`src/components/shared/UserAvatar.tsx`, image or initials) with a dropup menu (Profile, Sign out) and a settings link to `/profile`; `SidebarUser` uses Suspense + `connection()` for Cache Components; form fields use `useId` since Next keeps previous routes mounted; shadcn dropdown-menu and label added; removed `src/lib/mock-data.ts`
+- Email Verification — `resend` SDK; registration sends a verification email (`src/lib/email/verification-email.ts`, lazy client via `getResend()` in `src/lib/email/resend.ts`, `EMAIL_FROM`/`APP_URL` env with dev defaults `onboarding@resend.dev`/`http://localhost:3000`); single-use 24h tokens in `VerificationToken` storing only a SHA-256 hash (`src/lib/email/verification-token.ts`, no migration); `GET /api/auth/verify-email` sets `emailVerified` and redirects to `/sign-in?verified=1` or `?verifyError=invalid|expired`; credentials sign-in blocked for unverified users via `EmailNotVerifiedError` (custom `CredentialsSignin` code, checked after the password matches); register form shows `CheckInboxNotice` instead of redirecting; `resendVerificationEmail` action + `ResendVerificationButton` with 60s cooldown (`RESEND_COOLDOWN_SECONDS` in `src/lib/constants/auth.ts`) and a response that doesn't reveal whether the account exists; shared `emailSchema` exported from `src/lib/validations/auth.ts`
