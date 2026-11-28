@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sendVerificationEmail } from "@/lib/email/verification-email";
 import { BCRYPT_SALT_ROUNDS, registerSchema } from "@/lib/validations/auth";
 
 interface RegisterResponse {
   success: boolean;
-  data?: { id: string; name: string | null; email: string };
+  data?: { id: string; name: string | null; email: string; emailSent: boolean };
   error?: string;
 }
 
@@ -41,7 +42,16 @@ export async function POST(request: Request) {
       select: { id: true, name: true, email: true },
     });
 
-    return NextResponse.json<RegisterResponse>({ success: true, data: user }, { status: 201 });
+    // A failed send doesn't undo the account; the user can request a new link
+    const emailSent = await sendVerificationEmail(user.email, user.name).catch((error: unknown) => {
+      console.error("Verification email failed:", error);
+      return false;
+    });
+
+    return NextResponse.json<RegisterResponse>(
+      { success: true, data: { ...user, emailSent } },
+      { status: 201 },
+    );
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return errorResponse("A user with this email already exists", 409);

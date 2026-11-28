@@ -1,17 +1,23 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import FormField from "@/components/auth/FormField";
 import FormAlert from "@/components/auth/FormAlert";
+import CheckInboxNotice from "@/components/auth/CheckInboxNotice";
 import { registerSchema } from "@/lib/validations/auth";
 
 type RegisterField = "name" | "email" | "password" | "confirmPassword";
 type FieldErrors = Partial<Record<RegisterField, string>>;
 
+interface RegisteredUser {
+  email: string;
+  emailSent: boolean;
+}
+
 interface RegisterResponse {
   success: boolean;
+  data?: RegisteredUser;
   error?: string;
 }
 
@@ -32,10 +38,10 @@ function getFieldErrors(values: Record<RegisterField, string>): FieldErrors {
 }
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string>();
   const [isPending, setIsPending] = useState(false);
+  const [registered, setRegistered] = useState<RegisteredUser>();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,17 +65,21 @@ export default function RegisterForm() {
       });
       const result: RegisterResponse = await response.json();
 
-      if (!response.ok || !result.success) {
+      if (!response.ok || !result.success || !result.data) {
         setError(result.error ?? "Registration failed. Please try again.");
         setIsPending(false);
         return;
       }
 
-      router.push("/sign-in?registered=1");
+      setRegistered(result.data);
     } catch {
       setError("Something went wrong. Please try again.");
       setIsPending(false);
     }
+  }
+
+  if (registered) {
+    return <CheckInboxNotice email={registered.email} emailSent={registered.emailSent} />;
   }
 
   return (

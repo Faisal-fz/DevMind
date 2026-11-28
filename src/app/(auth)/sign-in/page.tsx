@@ -17,6 +17,12 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
 };
 const DEFAULT_AUTH_ERROR = "Sign in failed. Please try again.";
 
+// Set by /api/auth/verify-email
+const VERIFY_ERROR_MESSAGES: Record<string, string> = {
+  expired: "This verification link has expired. Sign in to request a new one.",
+  invalid: "This verification link is invalid or has already been used.",
+};
+
 function firstParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -27,12 +33,16 @@ async function SignInOptions({ searchParams }: { searchParams: SignInSearchParam
   const params = await searchParams;
   const callbackUrl = firstParam(params.callbackUrl);
   const authError = firstParam(params.error);
-  const registered = firstParam(params.registered) === "1";
+  const verified = firstParam(params.verified) === "1";
+  const verifyError = firstParam(params.verifyError);
 
   return (
     <div className="space-y-4">
-      {registered && (
-        <FormAlert variant="success" message="Account created. You can now sign in." />
+      {verified && (
+        <FormAlert variant="success" message="Email verified. You can now sign in." />
+      )}
+      {verifyError && (
+        <FormAlert message={VERIFY_ERROR_MESSAGES[verifyError] ?? VERIFY_ERROR_MESSAGES.invalid} />
       )}
       {authError && <FormAlert message={AUTH_ERROR_MESSAGES[authError] ?? DEFAULT_AUTH_ERROR} />}
       <GitHubSignInButton callbackUrl={callbackUrl} />

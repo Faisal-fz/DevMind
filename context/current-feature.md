@@ -1,18 +1,37 @@
-# Current Feature
+# Current Feature: Email Verification
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+In Progress
 
 ## Goals
 
 <!-- Goals & requirements -->
 
+- Registering an email/password account sends a verification email through Resend
+- The email has a link with a single-use token that expires
+- Opening the link sets `User.emailVerified` and deletes the token, then sends the user to `/sign-in` with a success message
+- Invalid, expired or already-used links show a clear error message
+- Email/password sign-in is blocked until the email is verified, with a clear message
+- After registering, the user is told to check their inbox (not just "Account created")
+- "Resend verification email" option for unverified users (from the check-your-inbox message and the blocked sign-in message); issues a new token and replaces the old one, with a cooldown to prevent spamming
+
 ## Notes
 
 <!-- Any extra notes -->
+
+- Inline description: "when user register they get an email and user get an link to verify their email. for this we are using resend."
+- `RESEND_API_KEY` is already set in `.env` and `.env.production`
+- Schema already has `User.emailVerified` and the `VerificationToken` model (`identifier`, `token`, `expires`), so no migration should be needed
+- Registration lives in `POST /api/auth/register`; sign-in is the `signInWithCredentials` server action plus `authorize` in `src/auth.ts`
+- Store a hash of the token in the database, not the raw token; send the raw token in the link
+- Need a sender address and an app base URL for the link (e.g. `EMAIL_FROM`, `AUTH_URL`/`NEXT_PUBLIC_APP_URL`). Without a verified domain, Resend only sends from `onboarding@resend.dev` and only to the Resend account owner's email
+- GitHub OAuth users are not affected; GitHub has already verified those emails
+- Existing users (seeded demo user, earlier test users) have `emailVerified = null` and would be locked out; the seed should set `emailVerified` for the demo user
+- Resend action must not reveal whether an email is registered (same response either way)
+- Out of scope: password reset
 
 ## History
 

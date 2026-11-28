@@ -1,10 +1,16 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signInSchema } from "@/lib/validations/auth";
 import authConfig, { CREDENTIALS_FIELDS } from "./auth.config";
+
+export const EMAIL_NOT_VERIFIED_CODE = "email_not_verified";
+
+class EmailNotVerifiedError extends CredentialsSignin {
+  code = EMAIL_NOT_VERIFIED_CODE;
+}
 
 const credentialsProvider = Credentials({
   credentials: CREDENTIALS_FIELDS,
@@ -18,6 +24,9 @@ const credentialsProvider = Credentials({
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return null;
+
+    // Checked only after the password matches, so it doesn't reveal which emails exist
+    if (!user.emailVerified) throw new EmailNotVerifiedError();
 
     return { id: user.id, name: user.name, email: user.email, image: user.image };
   },
