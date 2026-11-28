@@ -1,38 +1,18 @@
-# Current Feature: Auth Phase 3 — Sign In, Register & Sign Out UI
+# Current Feature
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-In Progress
+Completed
 
 ## Goals
 
 <!-- Goals & requirements -->
 
-- Replace NextAuth's default pages with custom auth UI
-- `/sign-in` page: email and password fields, "Sign in with GitHub" button, link to register, form validation and error display
-- `/register` page: name, email, password, confirm password fields; validation (passwords match, email format); submits to `/api/auth/register`; redirects to sign-in on success
-- Sidebar bottom shows the signed-in user's avatar (GitHub image or initials fallback) and name
-- Clicking the avatar opens a dropdown/dropup with a "Sign out" link
-- Clicking the user icon goes to `/profile`
-- Sign out logs the user out and redirects
-
 ## Notes
 
 <!-- Any extra notes -->
-
-- Spec: `context/features/auth-spec-files/auth-phase-3-spec.md`
-- Avatar logic: use `image` if present (GitHub); otherwise initials from name (e.g. "Brad Traversy" → "BT")
-- Create a reusable avatar component that handles both cases
-- Testing:
-  1. `/sign-in` renders the custom page
-  2. GitHub sign-in flow works
-  3. Email/password sign-in flow works
-  4. Avatar shows (GitHub image or initials)
-  5. Clicking the avatar shows the dropdown
-  6. "Sign out" logs out and redirects
-  7. `/register` creates a new account and redirects to sign-in
 
 ## History
 
@@ -51,3 +31,4 @@ In Progress
 - Add Pro Badge to Sidebar — subtle outline "PRO" badge (shadcn/ui Badge) on the File and Image types in the sidebar, hidden on the collapsed icon rail; `isProItemType` helper in `src/lib/constants/item-types.ts`
 - Auth Phase 1 — NextAuth v5 (`next-auth@beta`) with GitHub OAuth; split config (`src/auth.config.ts` edge-safe providers, `src/auth.ts` with Prisma adapter and JWT sessions, `user.id` on the session); API route at `src/app/api/auth/[...nextauth]`; `src/proxy.ts` redirects signed-out users from `/dashboard/*` to NextAuth's default sign-in page; Session type extended in `src/types/next-auth.d.ts`
 - Auth Phase 2 — email/password sign-in via the NextAuth Credentials provider (edge-safe `authorize: () => null` placeholder in `src/auth.config.ts`, replaced in `src/auth.ts` with a bcrypt check against `User.password`); `POST /api/auth/register` (name, email, password, confirmPassword; 201/400/409/500 with `{ success, data, error }`, cost-12 bcrypt hash); Zod added for validation with shared schemas in `src/lib/validations/auth.ts` (emails trimmed and lowercased, passwords 8–72 chars); `.playwright-mcp/` gitignored
+- Auth Phase 3 — custom `/sign-in` and `/register` pages in the `(auth)` route group (`pages.signIn` in `src/auth.config.ts`); credentials sign-in, GitHub sign-in and sign-out as server actions in `src/actions/auth.ts` (`callbackUrl` limited to relative paths); register form validates with the shared `registerSchema` before posting to `/api/auth/register`, then redirects to `/sign-in?registered=1`; proxy redirects signed-out users to `/sign-in`; sidebar shows the session user via reusable `UserAvatar` (`src/components/shared/UserAvatar.tsx`, image or initials) with a dropup menu (Profile, Sign out) and a settings link to `/profile`; `SidebarUser` uses Suspense + `connection()` for Cache Components; form fields use `useId` since Next keeps previous routes mounted; shadcn dropdown-menu and label added; removed `src/lib/mock-data.ts`
